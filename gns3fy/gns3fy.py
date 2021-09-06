@@ -802,6 +802,7 @@ class Node:
         if self.links:
             self.links = []
         for _link in _response.json():
+            _link.pop("link_style", None)
             self.links.append(Link(connector=self.connector, **_link))
 
     @verify_connector_and_id
@@ -977,8 +978,12 @@ class Node:
             f"templates/{self.template_id}"
         )
 
+        if not self.x:
+            self.x=0
+        if not self.y:
+            self.y=0
         _response = self.connector.http_call(
-            "post", _url, json_data=dict(x=0, y=0, compute_id=self.compute_id)
+            "post", _url, json_data=dict(x=self.x, y=self.y, compute_id=self.compute_id)
         )
 
         self._update(_response.json())
@@ -1216,7 +1221,8 @@ class Project:
             if k not in ("stats", "nodes", "links", "connector", "__initialised__")
             if v is not None
         }
-
+        data.pop('filename', None)
+        data.pop('status', None)
         _response = self.connector.http_call("post", _url, json_data=data)
 
         # Now update it
@@ -1402,6 +1408,7 @@ class Project:
         if self.links:
             self.links = []
         for _link in _response.json():
+            _link.pop('link_style', None)
             _l = Link(connector=self.connector, **_link)
             _l.project_id = self.project_id
             self.links.append(_l)
